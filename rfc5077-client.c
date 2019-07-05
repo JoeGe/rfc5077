@@ -169,6 +169,19 @@ resultinfo_display(struct resultinfo *result) {
     if (BIO_printf(mem, " │   %s    │ %s ",
 		   SSL_SESSION_has_ticket(x)?"✔":"✘",
 		   result->answer?result->answer:"") <= 0) goto err;
+
+ 	const unsigned char *ticket_content = calloc(1, 4096);
+ 	size_t ticket_len = 0;
+ 	SSL_SESSION_get0_ticket(x, &ticket_content, &ticket_len);
+
+ 	if (BIO_printf(mem, " │   %d    │ ",
+ 	            (unsigned int)ticket_len)<= 0) goto err;
+
+ 	int i = 0;
+ 	for (i = 0; i < ticket_len; i++) {
+ 	 if (BIO_printf(mem, "%02X", ticket_content[i]) <= 0) goto err;
+ 	}
+
   }
 
   n = BIO_get_mem_data(mem, &buf);
